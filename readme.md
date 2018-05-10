@@ -18,7 +18,7 @@ console.log(xib.bold.green.yellowBackground`Hello, world!`)
 ```
 
 You may also set current style just calling xib:
-```
+```js
 console.log(xib.red())
 console.log('Hello, world!')    // will be red
 console.log(xib.reset())        // reset styles
