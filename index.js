@@ -52,6 +52,42 @@ const backgroundColors = new Map([
     ['brightCyanBackground', [106, 49]],
     ['brightWhiteBackground', [107, 49]]
 ]);
+const build = style => {
+    let prefixStyles = new Set();
+    let postfixStyles = new Set();
+    let prefix = '';
+    let postfix = '';
+
+    for(const [key, value] of modifiers) {
+        if(!style[key]) {
+            continue;
+        }
+
+        prefixStyles.add(first(value));
+        postfixStyles.add(second(value));
+    }
+
+   if(!empty(style.color)) {
+        prefixStyles.add(first(style.color));
+        postfixStyles.add(second(style.color));
+    }
+
+    if(!empty(style.backgroundColor)) {
+        prefixStyles.add(first(style.backgroundColor));
+        postfixStyles.add(second(style.backgroundColor));
+    }
+
+    if(!empty(prefixStyles)) {
+        prefix = `\x1b[${[...prefixStyles].map(String).join(';')}m`;
+    }
+
+    postfixStyles.delete(0);
+    if(!empty(postfixStyles)) {
+        postfix = `\x1b[${[...postfixStyles].map(String).join(';')}m`;
+    }
+
+    return {prefix, postfix};
+};
 
 const create = (style = {
     reset: false,
@@ -67,43 +103,12 @@ const create = (style = {
     backgroundColor: []
 }) => {
     const cache = new WeakMap();
+    const {prefix, postfix} = build(style);
+
     const xib = new Proxy(String.raw, {
         apply(target, thisArgument, argumentsList) {
-            let prefixStyles = new Set();
-            let postfixStyles = new Set();
-            let prefix = '';
-            let postfix = '';
-
-            for(const [key, value] of modifiers) {
-                if(!style[key]) {
-                    continue;
-                }
-
-                prefixStyles.add(first(value));
-                postfixStyles.add(second(value));
-            }
-
-           if(!empty(style.color)) {
-                prefixStyles.add(first(style.color));
-                postfixStyles.add(second(style.color));
-            }
-
-            if(!empty(style.backgroundColor)) {
-                prefixStyles.add(first(style.backgroundColor));
-                postfixStyles.add(second(style.backgroundColor));
-            }
-
-            if(!empty(prefixStyles)) {
-                prefix = `\x1b[${[...prefixStyles].map(String).join(';')}m`;
-            }
-
             if(empty(argumentsList)) {
                 return prefix;
-            }
-
-            postfixStyles.delete(0);
-            if(!empty(postfixStyles)) {
-                postfix = `\x1b[${[...postfixStyles].map(String).join(';')}m`;
             }
 
             return `${prefix}${target.apply(thisArgument, argumentsList)}${postfix}`;
