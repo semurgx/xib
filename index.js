@@ -1,3 +1,4 @@
+const {defineProperty, setPrototypeOf} = Object;
 const empty = arrayOrSet => arrayOrSet instanceof Array ? arrayOrSet.length === 0 : arrayOrSet.size === 0;
 const first = array => array[0];
 const second = array => array[1];
@@ -88,6 +89,25 @@ const build = style => {
 
     return {prefix, postfix};
 };
+const update = (style, property) => {
+    let newStyle = style;
+
+    if(modifiers.has(property) && !newStyle[property]) {
+        newStyle = {...style, [property]: true};
+    } else if(colors.has(property)) {
+        let newColor = colors.get(property);
+        if(newStyle.color !== newColor) {
+            newStyle = {...style, color: newColor};
+        }
+    } else if(backgroundColors.has(property)) {
+        let newBackgroundColor = backgroundColors.get(property);
+        if(newStyle.backgroundColor !== newBackgroundColor) {
+            newStyle = {...style, backgroundColor: newBackgroundColor};
+        }
+    }
+
+    return newStyle;
+}
 
 const create = (style = {
     reset: false,
@@ -105,51 +125,44 @@ const create = (style = {
     const cache = new WeakMap();
     const {prefix, postfix} = build(style);
 
-    const xib = new Proxy(String.raw, {
-        apply(target, thisArgument, argumentsList) {
-            if(empty(argumentsList)) {
-                return prefix;
-            }
-
-            return `${prefix}${target.apply(thisArgument, argumentsList)}${postfix}`;
-        },
-        get(target, property) {
-            if(![
-                ...modifiers.keys(),
-                ...colors.keys(),
-                ...backgroundColors.keys()
-            ].includes(property)) {
-                return target[property];
-            }
-
-            if(cache.get(xib).has(property)) {
-                return cache.get(xib).get(property);
-            }
-
-            let newStyle = style;
-            if(modifiers.has(property) && !newStyle[property]) {
-                newStyle = {...style, [property]: true};
-            } else if(colors.has(property)) {
-                let newColor = colors.get(property);
-                if(newStyle.color !== newColor) {
-                    newStyle = {...style, color: newColor};
-                }
-            } else if(backgroundColors.has(property)) {
-                let newBackgroundColor = backgroundColors.get(property);
-                if(newStyle.backgroundColor !== newBackgroundColor) {
-                    newStyle = {...style, backgroundColor: newBackgroundColor};
-                }
-            }
-            if(newStyle === style) {
-                return xib;
-            }
-
-            const newXib = create(newStyle);
-            cache.get(xib).set(property, newXib);
-
-            return newXib;
+    const xib = function(...argumentsList) {
+        if(empty(argumentsList)) {
+            return prefix;
         }
-    });
+
+        return `${prefix}${String.raw.apply(this, argumentsList)}${postfix}`;
+    };
+    const prototype = {};
+    for(const property of [...modifiers.keys(), ...colors.keys(), ...backgroundColors.keys()]) {
+        defineProperty(prototype, property, {
+            configurable: true,
+            enumerable: true,
+            get() {
+                if(cache.get(xib).has(property)) {
+                    return cache.get(xib).get(property);
+                }
+
+                let newStyle = update(style, property);
+                if(newStyle === style) {
+                    return xib;
+                }
+
+                const newXib = create(newStyle);
+                cache.get(xib).set(property, newXib);
+
+                return newXib;
+            },
+            set(newValue) {
+                defineProperty(prototype, property, {
+                    configurable: true,
+                    enumerable: true,
+                    value: newValue
+                });
+            }
+        });
+    }
+    setPrototypeOf(prototype, Function.prototype);
+    setPrototypeOf(xib, prototype);
     cache.set(xib, new Map());
 
     return xib;

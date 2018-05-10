@@ -1,6 +1,6 @@
 {
     "name": "xib",
-    "version": "0.0.4",
+    "version": "0.0.5",
     "description": "Basic terminal styling",
     "license": "MIT",
     "repository": "github:semurgx/xib",
@@ -13,7 +13,6 @@
         "command-line",
         "cli",
         "tty",
-        "shell",
         "shell",
         "style",
         "color",

@@ -93,9 +93,9 @@ describe('xib', () => {
 
     describe('caching', () => {
         it('should cache equal calling chains', () => {
-            (xib.white === xib.white).should.be.true;
-            (xib.italic.brightMagentaBackground === xib.italic.brightMagentaBackground).should.be.true;
-            (xib.bold.red !== xib.red.bold).should.be.true;
+            xib.white.should.equal(xib.white);
+            xib.italic.brightMagentaBackground.should.equal(xib.italic.brightMagentaBackground);
+            xib.bold.red.should.not.equal(xib.red.bold);
         });
     });
 
