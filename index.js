@@ -52,7 +52,6 @@ const backgroundColors = new Map([
     ['brightCyanBackground', [106, 49]],
     ['brightWhiteBackground', [107, 49]]
 ]);
-const cache = new WeakMap();
 
 const create = (style = {
     reset: false,
@@ -67,6 +66,7 @@ const create = (style = {
     color: [],
     backgroundColor: []
 }) => {
+    const cache = new WeakMap();
     const xib = new Proxy(String.raw, {
         apply(target, thisArgument, argumentsList) {
             let prefixStyles = new Set();
