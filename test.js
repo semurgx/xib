@@ -112,8 +112,8 @@ describe('xib', () => {
 
         describe('consecutive chaining', () => {
             it("shouldn't create new xib", () => {
-                (xib.red === xib.red.red).should.be.true;
-                (xib.yellow === xib.yellow.yellow.yellow).should.be.true
+                xib.red.should.equal(xib.red.red);
+                xib.yellow.should.equal(xib.yellow.yellow.yellow);
             });
         });
     });
