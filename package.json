@@ -1,24 +1,14 @@
 {
     "name": "xib",
-    "version": "0.0.6",
+    "version": "0.1.0",
     "description": "Basic terminal styling",
     "license": "MIT",
     "repository": "github:semurgx/xib",
-    "files": [
-        "index.js"
-    ],
+    "main": "index.js",
     "keywords": [
         "terminal",
-        "console",
-        "command-line",
-        "cli",
-        "tty",
-        "shell",
         "style",
         "color",
-        "colors",
-        "colour",
-        "colours",
         "formatting",
         "ansi"
     ],
